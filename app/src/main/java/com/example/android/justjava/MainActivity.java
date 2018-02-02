@@ -3,6 +3,7 @@ package com.example.android.justjava;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
+import android.widget.CheckBox;
 import android.widget.TextView;
 
 import java.text.NumberFormat;
@@ -20,6 +21,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
     }
+
 
     /**
      * This method is called when clicking the plus button
@@ -47,10 +49,13 @@ public class MainActivity extends AppCompatActivity {
      * This method is called when the order button is clicked.
      */
     public void submitOrder(View view) {
+        CheckBox whippedCreamCheckbox = (CheckBox) findViewById(R.id.checkbox_whippedcream);
+        boolean hasWhippedCream = whippedCreamCheckbox.isChecked();
+
         int totalPrice = calculatePrice();
 
         if (quantity >= 1){
-            displayMessage(createOrderSummary(totalPrice));
+            displayMessage(createOrderSummary(totalPrice, hasWhippedCream));
         } else {
             String message = "Please try again. You must select at least 1 coffee to submit an order.";
 
@@ -67,9 +72,15 @@ public class MainActivity extends AppCompatActivity {
         return quantity * baseCoffeePrice;
     }
 
-    private String createOrderSummary(int totalPrice){
+    private String createOrderSummary(int totalPrice, boolean addWhippedCream){
         String customerName = "Your Name Here";
-        return "Name: " + customerName +  "\nQuantity: " + quantity + "\nTotal: " + NumberFormat.getCurrencyInstance().format(totalPrice) + "\nThank you!";
+        String orderSummary = "";
+        orderSummary += "Name: " + customerName;
+        orderSummary += "\nAdd whipped cream?: " + addWhippedCream;
+        orderSummary += "\nQuantity: " + quantity;
+        orderSummary += "\nTotal: " + NumberFormat.getCurrencyInstance().format(totalPrice);
+        orderSummary += "\nThank you!";
+        return orderSummary;
     }
 
     /**

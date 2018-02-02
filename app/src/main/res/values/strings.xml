@@ -9,4 +9,6 @@
     <string name="order_button_text">order</string>
     <string name="clear_button_text">clear</string>
     <string name="order_confirmed"></string>
+    <string name="cb_text_topping_whip">Whipped Cream</string>
+    <string name="toppings_header">Toppings</string>
 </resources>
