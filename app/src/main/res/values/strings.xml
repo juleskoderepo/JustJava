@@ -10,5 +10,7 @@
     <string name="clear_button_text">clear</string>
     <string name="order_confirmed"></string>
     <string name="cb_text_topping_whip">Whipped Cream</string>
+    <string name="cb_text_topping_choco">Chocolate</string>
     <string name="toppings_header">Toppings</string>
+    <string name="edittext_name_hint">Name</string>
 </resources>
