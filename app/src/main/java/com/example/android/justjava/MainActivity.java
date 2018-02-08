@@ -7,6 +7,7 @@ import android.view.View;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.text.NumberFormat;
 
@@ -15,71 +16,117 @@ import java.text.NumberFormat;
  * This app displays an order form to order coffee.
  */
 public class MainActivity extends AppCompatActivity {
-    int quantity = 0;
+    int quantity = 1;
     int baseCoffeePrice = 4;
+    int tax = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        displayPrice(calculatePrice(hasTopping(R.id.checkbox_whippedcream), hasTopping(R.id.checkbox_chocolate)));
     }
 
+    /**
+     * Add save instance
+     */
+
+    /**
+     * Add restore instance
+     */
+
+    /**
+     * Add checkbox listener to update price total when checkbox is
+     * toggled and quantity is > 0.
+     */
 
     /**
      * This method is called when clicking the plus button
      */
-    public void increment(View view){
-        quantity += 1;
+    public void increment(View view) {
+        //Do not allow quantity over 100.
+        if (quantity == 100) {
+            //Notify the user of the upper limit for orders
+            Toast.makeText(getApplicationContext(), "Order limit reached", Toast.LENGTH_SHORT).show();
+            //Exit method
+            return;
+        }
 
+        quantity += 1;
         displayQuantity(quantity);
-        displayPrice(calculatePrice());
+        displayPrice(calculatePrice(hasTopping(R.id.checkbox_whippedcream), hasTopping(R.id.checkbox_chocolate)));
     }
 
     /**
      * This method is called when clicking the minus button
      */
-    public void decrement(View view){
-        if (quantity > 0)  {
-            quantity -= 1;
+    public void decrement(View view) {
+        //Do not allow quantity less than 1.
+        if (quantity == 1) {
+            //Notify user of the lower limit for orders
+            Toast.makeText(getApplicationContext(), "Must order at least 1 coffee", Toast.LENGTH_SHORT).show();
+            //Exit method
+            return;
         }
 
+        quantity -= 1;
         displayQuantity(quantity);
-        displayPrice(calculatePrice());
+        displayPrice(calculatePrice(hasTopping(R.id.checkbox_whippedcream), hasTopping(R.id.checkbox_chocolate)));
+    }
+
+    /**
+     * This method is called to determine whether a topping is selected
+     * and returns true or false.
+     *
+     * @param checkBoxID ID number of the topping checkbox
+     * @return addTopping the boolean state of the topping checkbox
+     */
+    private boolean hasTopping(int checkBoxID) {
+        CheckBox toppingCheckBox = (CheckBox) findViewById(checkBoxID);
+        boolean addTopping = toppingCheckBox.isChecked();
+
+        return addTopping;
     }
 
     /**
      * This method is called when the order button is clicked.
-     *
-     * @param view
      */
     public void submitOrder(View view) {
         EditText nameEditText = (EditText) findViewById(R.id.edittext_name_input);
         String nameEntered = nameEditText.getText().toString();
 
-        CheckBox whippedCreamCheckbox = (CheckBox) findViewById(R.id.checkbox_whippedcream);
-        boolean hasWhippedCream = whippedCreamCheckbox.isChecked();
+        boolean hasWhippedCream = hasTopping(R.id.checkbox_whippedcream);
+        boolean hasChocolate = hasTopping(R.id.checkbox_chocolate);
 
-        CheckBox chocolateCheckbox = (CheckBox) findViewById(R.id.checkbox_chocolate);
-        boolean hasChocloate = chocolateCheckbox.isChecked();
+        int totalPrice = calculatePrice(hasWhippedCream, hasChocolate);
 
-        int totalPrice = calculatePrice();
-
-        if (quantity >= 1){
-            displayMessage(createOrderSummary(nameEntered, hasWhippedCream, hasChocloate, totalPrice));
-        } else {
-            String message = "Please try again. You must select at least 1 coffee to submit an order.";
-
-            displayMessage(message);
-        }
-        }
+        displayMessage(createOrderSummary(nameEntered, hasWhippedCream, hasChocolate, totalPrice));
+    }
 
     /**
      * Calculates the price of the order.
      *
-     * @return total price of the order.
+     * @return grandTotal total price of the order.
      */
-    private int calculatePrice(){
-        return quantity * baseCoffeePrice;
+    private int calculatePrice(boolean addWhip, boolean addChocolate) {
+        int grandTotal;
+        int subTotal = baseCoffeePrice;
+
+        //Add $1 to price if user wants whipped cream
+        if (addWhip) {
+            subTotal += 1;
+        }
+
+        //Add $2 to price if user wants chocolate
+        if (addChocolate) {
+            subTotal += 2;
+        }
+
+        // Calculate the total price based on the number ordered and tax, if any.
+        grandTotal = (subTotal * quantity) * (1 + tax);
+
+        return grandTotal;
     }
 
 
@@ -91,13 +138,24 @@ public class MainActivity extends AppCompatActivity {
      * @param addWhippedCream
      * @param addChocolate
      * @param totalPrice
-     * @return
+     * @return orderSummary message displayed summarizing the user's order
      */
-    private String createOrderSummary(String custName, boolean addWhippedCream, boolean addChocolate,int totalPrice){
+    private String createOrderSummary(String custName, boolean addWhippedCream, boolean addChocolate, int totalPrice) {
         String orderSummary = "";
         orderSummary += "Name: " + custName;
-        orderSummary += "\nAdd whipped cream?: " + addWhippedCream;
-        orderSummary += "\nAdd chocolate?: " + addChocolate;
+
+        if (addWhippedCream) {
+            orderSummary += "\nAdd whip";
+        } else {
+            orderSummary += "\nNo whip";
+        }
+
+        if (addChocolate) {
+            orderSummary += "\nAdd chocolate";
+        } else {
+            orderSummary += "\nNo chocolate";
+        }
+
         orderSummary += "\nQuantity: " + quantity;
         orderSummary += "\nTotal: " + NumberFormat.getCurrencyInstance().format(totalPrice);
         orderSummary += "\nThank you!";
@@ -115,6 +173,7 @@ public class MainActivity extends AppCompatActivity {
         displayPrice(price);
         uncheckToppings();
     }
+
     /**
      * This method displays the given quantity value on the screen.
      */
@@ -134,17 +193,17 @@ public class MainActivity extends AppCompatActivity {
     /**
      * This method clears the topping checkboxes
      */
-    private void uncheckToppings(){
+    private void uncheckToppings() {
         CheckBox whippedCreamTopping, chocolateTopping;
 
         whippedCreamTopping = (CheckBox) findViewById(R.id.checkbox_whippedcream);
         chocolateTopping = (CheckBox) findViewById(R.id.checkbox_chocolate);
 
-        if(whippedCreamTopping.isChecked()){
+        if (whippedCreamTopping.isChecked()) {
             whippedCreamTopping.toggle();
         }
 
-        if (chocolateTopping.isChecked()){
+        if (chocolateTopping.isChecked()) {
             chocolateTopping.toggle();
         }
     }
